@@ -26,6 +26,7 @@ def hello():
 def upload():
     if (request.method == 'POST'):
         data = request.get_json()
+        print(data)
 
         # validate data
         keys = data.keys()

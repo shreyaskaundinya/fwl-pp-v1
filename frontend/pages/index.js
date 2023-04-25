@@ -7,23 +7,20 @@ import { toast } from 'react-toastify';
 import { db } from '../utils/firebaseSetup';
 
 function StatusBox({ flag, icon, sensorName, unlocked }) {
+    // console.log('rendering', flag, unlocked);
     return (
         <div className='flex flex-col gap-4 items-center bg-white rounded-md border-2 p-4 w-[300px]'>
             <div className='svg'>{icon}</div>
             <p className='text-step-2'>{sensorName}</p>
             {unlocked === undefined ? (
-                <div className='bg-slate-200 text-black font-bold px-4 py-2 rounded-full'>
-                    Loading..
+                <div className='bg-red-400 text-white font-bold px-4 py-2 rounded-full'>
+                    Loading...
                 </div>
-            ) : unlocked ? (
-                <div className='bg-slate-100 text-black font-bold px-4 py-2 rounded-full'>
+            ) : unlocked === 'false' ? (
+                <div className='bg-gray-400 text-white font-bold px-4 py-2 rounded-full'>
                     Unlocked
                 </div>
-            ) : flag === undefined ? (
-                <div className='bg-slate-200 text-black font-bold px-4 py-2 rounded-full'>
-                    Loading..
-                </div>
-            ) : flag ? (
+            ) : flag === 'true' ? (
                 <div className='bg-green-400 text-white font-bold px-4 py-2 rounded-full'>
                     Safe
                 </div>
@@ -46,12 +43,13 @@ function Home() {
             (snapshot) => {
                 const data = snapshot.docs.sort((a, b) => {
                     return (
-                        new Date(a.data().timestamp) -
-                        new Date(b.data().timestamp)
+                        new Date(b.data().timestamp) -
+                        new Date(a.data().timestamp)
                     );
                 });
                 setLoading(true);
                 setData(data.map((doc) => doc.data()));
+                // console.log(data[0].data());
                 setLoading(false);
             }
         );
@@ -60,33 +58,32 @@ function Home() {
         };
     }, []);
 
-    useEffect(() => {
-        const latest = data ? data[data.length - 1] : undefined;
-        if (latest) {
-            if (
-                (!latest.rfid || !latest.force || !latest.laser) &&
-                !latest.unlocked
-            ) {
-                toast('DANGER!!', { type: 'error' });
-            }
-        }
-    }, [data]);
+    // useEffect(() => {
+    //     const latest = data ? data[0] : undefined;
+    //     if (latest) {
+    //         if (
+    //             (latest.rfid || latest.force || latest.laser) &&
+    //             latest.unlocked
+    //         ) {
+    //             toast('DANGER!!', { type: 'error' });
+    //         }
+    //     }
+    // }, [data]);
 
     const rfidFlag = useMemo(
-        () => (data !== undefined ? data[data.length - 1].rfid : undefined),
+        () => (data !== undefined ? data[0]?.rfid : undefined),
         [data]
     );
-
     const laserFlag = useMemo(
-        () => (data !== undefined ? data[data.length - 1].laser : undefined),
+        () => (data !== undefined ? data[0]?.laser : undefined),
         [data]
     );
     const forceFlag = useMemo(
-        () => (data !== undefined ? data[data.length - 1].force : undefined),
+        () => (data !== undefined ? data[0]?.force : undefined),
         [data]
     );
     const unlocked = useMemo(
-        () => (data !== undefined ? data[data.length - 1].unlocked : undefined),
+        () => (data !== undefined ? data[0]?.unlocked : undefined),
         [data]
     );
 
